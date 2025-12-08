@@ -19,14 +19,38 @@ export function DataTable({ data, columns, defaultSortKey, searchKey, pagePrefix
 	const [search, setSearch] = useState('')
 	const [showAll, setShowAll] = useState(false)
 
+	const [sortKey, setSortKey] = useState(defaultSortKey)
+	// newest first
+	const [sortDir, setSortDir] = useState<'ascending' | 'descending'>('descending')
+
+	function handleSort(colKey: string) {
+		if (sortKey === colKey) {
+			setSortDir(prev => (prev === 'ascending' ? 'descending' : 'ascending'))
+		} else {
+			setSortKey(colKey)
+			setSortDir('descending')
+		}
+	}
+
 	const processed = useMemo(() => {
 		let list = [...data]
 
-		// newest first
-		list.sort((a, b) =>
-			new Date(b[defaultSortKey]).getTime() -
-			new Date(a[defaultSortKey]).getTime()
-		)
+		list.sort((a, b) => {
+			const aVal = a[sortKey]
+			const bVal = b[sortKey]
+
+			let result: number
+
+			if (typeof aVal === 'number' && typeof bVal === 'number') {
+				result = aVal - bVal
+			} else if (!isNaN(Date.parse(aVal)) && !isNaN(Date.parse(bVal))) {
+				result = Date.parse(aVal) - Date.parse(bVal)
+			} else {
+				result = String(aVal).localeCompare(String(bVal))
+			}
+
+			return sortDir === 'ascending' ? result : -result
+		})
 
 		if (search) {
 			const q = search.toLowerCase()
@@ -36,7 +60,7 @@ export function DataTable({ data, columns, defaultSortKey, searchKey, pagePrefix
 		}
 
 		return list
-	}, [data, search, defaultSortKey, searchKey])
+	}, [data, search, sortKey, sortDir, searchKey])
 
 	const visible = showAll ? processed : processed.slice(0, 32)
 
@@ -58,7 +82,11 @@ export function DataTable({ data, columns, defaultSortKey, searchKey, pagePrefix
 				<thead>
 					<tr>
 						{columns.map(col => (
-							<th key={col.key} className={col.className || ''}>
+							<th
+								key={col.key}
+								className={col.className || ''}
+								onClick={() => handleSort(col.key)}
+							>
 								{col.label}
 							</th>
 						))}
@@ -66,7 +94,8 @@ export function DataTable({ data, columns, defaultSortKey, searchKey, pagePrefix
 				</thead>
 				<tbody>
 					{visible.map((row, index) => (
-						<tr key={index}
+						<tr
+							key={index}
 							onClick={() => {
 								if (!row.settlementId) return
 								const url = `/${pagePrefix}/${row.settlementId}`
@@ -74,15 +103,30 @@ export function DataTable({ data, columns, defaultSortKey, searchKey, pagePrefix
 							}}
 							className='clickable-row'
 						>
-							{columns.map(col => (
-								<td key={col.key} className={col.className || ''}>
-									{row[col.key]}
-								</td>
-							))}
+							{columns.map(col => {
+								const value = row[col.key]
+
+								if (typeof value === 'number') {
+									return (
+										<td key={col.key} className={col.className || ''}>
+											{value.toFixed(2)}
+										</td>
+									)
+								}
+
+								return (
+									<td key={col.key} className={col.className || ''}>
+										{value}
+									</td>
+								)
+							})}
 						</tr>
 					))}
 				</tbody>
 			</table>
+			<div className='table-info'>
+				Showing {visible.length} of {processed.length}
+			</div>
 			{!showAll && processed.length > 32 && (
 				<button onClick={() => setShowAll(true)}>
 					Show all
