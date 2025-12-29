@@ -20,7 +20,7 @@ export function Invoices() {
 
 	return (
 		<div className='invoices'>
-			<h1>Invoices</h1>
+			<h1>Invoices (v2.0)</h1>
 
 			{invoices.length === 0 ? (
 				<p>Loading...</p>
