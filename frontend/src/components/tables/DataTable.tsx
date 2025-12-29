@@ -7,15 +7,15 @@ export interface Column {
 	className?: string
 }
 
-interface DataTableProps {
-	data: any[]
+interface DataTableProps<T> {
+	data: T[]
 	columns: Column[]
 	defaultSortKey: string
 	searchKey: string
 	pagePrefix: string
 }
 
-export function DataTable({ data, columns, defaultSortKey, searchKey, pagePrefix }: DataTableProps) {
+export function DataTable<T extends Record<string, string | number | boolean | undefined | null>>({ data, columns, defaultSortKey, searchKey, pagePrefix }: DataTableProps<T>) {
 	const [search, setSearch] = useState('')
 	const [showAll, setShowAll] = useState(false)
 
@@ -43,8 +43,8 @@ export function DataTable({ data, columns, defaultSortKey, searchKey, pagePrefix
 
 			if (typeof aVal === 'number' && typeof bVal === 'number') {
 				result = aVal - bVal
-			} else if (!isNaN(Date.parse(aVal)) && !isNaN(Date.parse(bVal))) {
-				result = Date.parse(aVal) - Date.parse(bVal)
+			} else if (!isNaN(Date.parse(String(aVal))) && !isNaN(Date.parse(String(bVal)))) {
+				result = Date.parse(String(aVal)) - Date.parse(String(bVal))
 			} else {
 				result = String(aVal).localeCompare(String(bVal))
 			}

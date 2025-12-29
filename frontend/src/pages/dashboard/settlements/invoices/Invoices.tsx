@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { DataTable } from '../../../../components/tables/DataTable'
 import { getInvoices } from '../../../../services/invoices.service'
+import type { Invoice } from '../../../../types'
 import './Invoices.css'
 
 export function Invoices() {
-	const [invoices, setInvoices] = useState<any[]>([])
+	const [invoices, setInvoices] = useState<Invoice[]>([])
 	
 	useEffect(() => {
 		getInvoices().then(setInvoices)
@@ -20,7 +21,7 @@ export function Invoices() {
 
 	return (
 		<div className='invoices'>
-			<h1>Invoices</h1>
+			<h1>Invoices (v2.0)</h1>
 
 			{invoices.length === 0 ? (
 				<p>Loading...</p>
