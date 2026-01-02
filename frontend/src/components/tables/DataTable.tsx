@@ -15,7 +15,7 @@ interface DataTableProps<T> {
 	pagePrefix: string
 }
 
-export function DataTable<T extends Record<string, any>>({ data, columns, defaultSortKey, searchKey, pagePrefix }: DataTableProps<T>) {
+export function DataTable<T extends Record<string, unknown>>({ data, columns, defaultSortKey, searchKey, pagePrefix }: DataTableProps<T>) {
 	const [search, setSearch] = useState('')
 	const [showAll, setShowAll] = useState(false)
 
@@ -97,8 +97,9 @@ export function DataTable<T extends Record<string, any>>({ data, columns, defaul
 						<tr
 							key={index}
 							onClick={() => {
-								if (!row.settlementId) return
-								const url = `/${pagePrefix}/${row.settlementId}`
+								const settlementId = row['settlementId']
+								if (typeof settlementId !== 'string') return
+								const url = `/${pagePrefix}/${settlementId}`
 								window.open(url, '_blank')
 							}}
 							className='clickable-row'
@@ -116,7 +117,7 @@ export function DataTable<T extends Record<string, any>>({ data, columns, defaul
 
 								return (
 									<td key={col.key} className={col.className || ''}>
-										{value}
+										{String(value ?? '')}
 									</td>
 								)
 							})}
